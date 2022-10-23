@@ -21,6 +21,7 @@ export const links: LinksFunction = () => [
 export default function Index() {
   const uppy = useRef<Uppy | null>(null);
   const [files, setFiles] = useState<string[]>([]);
+  const [errors, setErrors] = useState<string[]>([]);
   const fetcher = useFetcher();
 
   useEffect(() => {
@@ -52,6 +53,16 @@ export default function Index() {
 
             setFiles((prev) => [...prev, name]);
           }
+        })
+        .on("restriction-failed", (file, error) => {
+          if (file && error) {
+            setErrors((prev) => [
+              ...prev,
+              `${file.name} could not be uploaded. Must be of type: ${
+                getRestrictions().allowed
+              }`,
+            ]);
+          }
         });
     }
   }, [fetcher]);
@@ -66,6 +77,16 @@ export default function Index() {
     >
       <div style={{ width: "65ch" }}>
         <div id="dropzone" style={{ marginBottom: "1rem" }}></div>
+        {errors.length > 0 && (
+          <>
+            <ul>
+              {errors.map((error) => (
+                <li key={error}>{error}</li>
+              ))}
+            </ul>
+            <button onClick={() => setErrors([])}>Clear</button>
+          </>
+        )}
         <div id="progress"></div>
         <ul>
           {files.map((file) => (

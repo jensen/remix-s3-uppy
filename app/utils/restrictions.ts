@@ -12,5 +12,6 @@ export const getRestrictions = () => {
         mime.substring(0, mime.length - 1),
       ];
     }) as Exclude<PresignedPostOptions["Conditions"], undefined>,
+    allowed: restrictions.map((mime) => mime.substring(0, mime.length - 2)),
   };
 };
