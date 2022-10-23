@@ -58,9 +58,11 @@ export default function Index() {
           if (file && error) {
             setErrors((prev) => [
               ...prev,
-              `${file.name} could not be uploaded. Must be of type: ${
-                getRestrictions().allowed
-              }`,
+              `${
+                file.name
+              } could not be uploaded. Must be of type: ${getRestrictions().allowed.join(
+                ", "
+              )}`,
             ]);
           }
         });
