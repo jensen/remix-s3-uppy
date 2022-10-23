@@ -1,6 +1,13 @@
-# Welcome to Remix!
+## Configuration
 
-- [Remix Docs](https://remix.run/docs)
+Example `.env`
+
+```
+STORAGE_KEY=
+STORAGE_SECRET=
+STORAGE_BUCKET=
+STORAGE_REGION=
+```
 
 ## Deployment
 
