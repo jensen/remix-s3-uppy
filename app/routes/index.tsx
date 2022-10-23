@@ -4,6 +4,7 @@ import Uppy from "@uppy/core";
 import DragDrop from "@uppy/drag-drop";
 import AwsS3 from "@uppy/aws-s3";
 import StatusBar from "@uppy/status-bar";
+import { getRestrictions } from "~/utils/restrictions";
 
 import type { LinksFunction } from "@remix-run/node";
 
@@ -24,7 +25,11 @@ export default function Index() {
 
   useEffect(() => {
     if (uppy.current === null) {
-      uppy.current = new Uppy()
+      uppy.current = new Uppy({
+        restrictions: {
+          allowedFileTypes: getRestrictions().uppy,
+        },
+      })
         .use(DragDrop, {
           target: "#dropzone",
         })

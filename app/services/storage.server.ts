@@ -1,5 +1,6 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { getRestrictions } from "~/utils/restrictions";
 
 if (!process.env.STORAGE_REGION) {
   throw new Error("Missing environment variable: STORAGE_REGION");
@@ -39,6 +40,7 @@ export const getUploadParameters = async (filename: string, type: string) => {
   const { url, fields } = await createPresignedPost(client, {
     ...commandConfig,
     Key: filename,
+    Conditions: getRestrictions().conditions,
     Fields: {
       success_action_status: "201",
       "content-type": type,
