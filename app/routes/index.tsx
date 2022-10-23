@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useFetcher } from "@remix-run/react";
 import Uppy from "@uppy/core";
 import DragDrop from "@uppy/drag-drop";
 import AwsS3 from "@uppy/aws-s3";
@@ -19,6 +20,7 @@ export const links: LinksFunction = () => [
 export default function Index() {
   const uppy = useRef<Uppy | null>(null);
   const [files, setFiles] = useState<string[]>([]);
+  const fetcher = useFetcher();
 
   useEffect(() => {
     if (uppy.current === null) {
@@ -34,14 +36,20 @@ export default function Index() {
           companionUrl: "/api/companion",
         })
         .on("upload-success", (file, response) => {
+          const url = response.uploadURL;
           const name = file?.name;
 
-          if (name) {
+          if (url && name) {
+            fetcher.submit(
+              { url, name },
+              { method: "post", action: "/api/complete" }
+            );
+
             setFiles((prev) => [...prev, name]);
           }
         });
     }
-  }, []);
+  }, [fetcher]);
 
   return (
     <div
