@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Uppy from "@uppy/core";
 import DragDrop from "@uppy/drag-drop";
 import AwsS3 from "@uppy/aws-s3";
@@ -18,6 +18,7 @@ export const links: LinksFunction = () => [
 
 export default function Index() {
   const uppy = useRef<Uppy | null>(null);
+  const [files, setFiles] = useState<string[]>([]);
 
   useEffect(() => {
     if (uppy.current === null) {
@@ -31,6 +32,13 @@ export default function Index() {
         })
         .use(AwsS3, {
           companionUrl: "/api/companion",
+        })
+        .on("upload-success", (file, response) => {
+          const name = file?.name;
+
+          if (name) {
+            setFiles((prev) => [...prev, name]);
+          }
         });
     }
   }, []);
@@ -46,6 +54,11 @@ export default function Index() {
       <div style={{ width: "65ch" }}>
         <div id="dropzone" style={{ marginBottom: "1rem" }}></div>
         <div id="progress"></div>
+        <ul>
+          {files.map((file) => (
+            <li key={file}>{file}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );
