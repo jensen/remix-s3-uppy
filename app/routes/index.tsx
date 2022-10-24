@@ -23,11 +23,11 @@ export default function Index() {
   const uppy = useRef<Uppy | null>(null);
   const [files, setFiles] = useState<string[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
-  const fetcher = useFetcher();
+  const { submit } = useFetcher();
 
   useEffect(() => {
     if (uppy.current === null) {
-      uppy.current = new Uppy({
+      const instance = new Uppy({
         restrictions: {
           allowedFileTypes: getRestrictions().uppy,
         },
@@ -52,7 +52,7 @@ export default function Index() {
             /* This request is handled by remix api
                any of the values sent here can be
                used to insert meta data into the db */
-            fetcher.submit(
+            submit(
               { url, filename, key },
               { method: "post", action: "/api/complete" }
             );
@@ -72,8 +72,16 @@ export default function Index() {
             ]);
           }
         });
+
+      uppy.current = instance;
+
+      return () => {
+        console.log("un");
+        instance.close({ reason: "unmount" });
+        uppy.current = null;
+      };
     }
-  }, [fetcher]);
+  }, [submit]);
 
   return (
     <div
