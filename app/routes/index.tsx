@@ -11,6 +11,7 @@ import type { LinksFunction } from "@remix-run/node";
 import uppyCoreStyles from "@uppy/core/dist/style.css";
 import uppyDragDropStyles from "@uppy/drag-drop/dist/style.css";
 import uppyStatusBarStyles from "@uppy/status-bar/dist/style.css";
+import { FileRenamePlugin } from "~/utils/file";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: uppyCoreStyles },
@@ -31,6 +32,7 @@ export default function Index() {
           allowedFileTypes: getRestrictions().uppy,
         },
       })
+        .use(FileRenamePlugin)
         .use(DragDrop, {
           target: "#dropzone",
         })
@@ -43,15 +45,19 @@ export default function Index() {
         })
         .on("upload-success", (file, response) => {
           const url = response.uploadURL;
-          const name = file?.name;
+          const filename = (file?.data as File).name;
+          const key = file?.meta.key as string;
 
-          if (url && name) {
+          if (url && filename && key) {
+            /* This request is handled by remix api
+               any of the values sent here can be
+               used to insert meta data into the db */
             fetcher.submit(
-              { url, name },
+              { url, filename, key },
               { method: "post", action: "/api/complete" }
             );
 
-            setFiles((prev) => [...prev, name]);
+            setFiles((prev) => [...prev, filename]);
           }
         })
         .on("restriction-failed", (file, error) => {
