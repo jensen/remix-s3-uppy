@@ -76,7 +76,6 @@ export default function Index() {
       uppy.current = instance;
 
       return () => {
-        console.log("un");
         instance.close({ reason: "unmount" });
         uppy.current = null;
       };
