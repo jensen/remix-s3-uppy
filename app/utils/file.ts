@@ -116,7 +116,7 @@ export class CheckResumePlugin extends BasePlugin {
 
     for (const id of ids) {
       const file = this.uppy.getFile(id) as UppyFile & {
-        s3Multipart: { uplaodId: string; key: string };
+        s3Multipart: { uploadId: string; key: string };
       };
 
       const uploadId = indexed[file.name]?.UploadId;
