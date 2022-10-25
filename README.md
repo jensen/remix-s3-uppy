@@ -9,6 +9,34 @@ STORAGE_BUCKET=
 STORAGE_REGION=
 ```
 
+### CORS
+
+For multipart upload develoment:
+
+```json
+[
+  {
+    "AllowedHeaders": [
+      "Authorization",
+      "x-amz-date",
+      "x-amz-content-sha256",
+      "content-type"
+    ],
+    "AllowedMethods": ["GET", "PUT"],
+    "AllowedOrigins": ["http://localhost:3000"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3000
+  },
+  {
+    "AllowedHeaders": [],
+    "AllowedMethods": ["GET"],
+    "AllowedOrigins": ["*"],
+    "ExposeHeaders": [],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
 ## Deployment
 
 After having run the `create-remix` command and selected "Vercel" as a deployment target, you only need to [import your Git repository](https://vercel.com/new) into Vercel, and it will be deployed.

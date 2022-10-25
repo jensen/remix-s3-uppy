@@ -1,6 +1,17 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  ListPartsCommand,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
+  ListMultipartUploadsCommand,
+  AbortMultipartUploadCommand,
+} from "@aws-sdk/client-s3";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { getRestrictions } from "~/utils/restrictions";
+
+export type { Part } from "@aws-sdk/client-s3";
 
 if (!process.env.STORAGE_REGION) {
   throw new Error("Missing environment variable: STORAGE_REGION");
@@ -53,4 +64,84 @@ export const getUploadParameters = async (filename: string, type: string) => {
     url,
     fields,
   };
+};
+
+export const listMultipartUploads = () => {
+  return createClient().send(new ListMultipartUploadsCommand(commandConfig));
+};
+
+export const listParts = (
+  key: string,
+  uploadId: string,
+  partNumberMarker: string
+) => {
+  return createClient().send(
+    new ListPartsCommand({
+      ...commandConfig,
+      Key: key,
+      UploadId: uploadId,
+      PartNumberMarker: partNumberMarker,
+    })
+  );
+};
+
+export const createMultipartUpload = (
+  key: string
+): Promise<{ Key: string; UploadId: string }> => {
+  return createClient().send(
+    new CreateMultipartUploadCommand({
+      ...commandConfig,
+      Key: key,
+    })
+  ) as Promise<{ Key: string; UploadId: string }>;
+};
+
+export const prepareUploadParts = (
+  key: string,
+  uploadId: string,
+  parts: number[]
+) => {
+  const client = createClient();
+
+  return Promise.all(
+    parts.map((number) =>
+      getSignedUrl(
+        client,
+        new UploadPartCommand({
+          ...commandConfig,
+          Key: key,
+          UploadId: uploadId,
+          PartNumber: number,
+        }),
+        { expiresIn: 3600 }
+      )
+    )
+  );
+};
+
+export const completeMultipartUpload = (
+  key: string,
+  uploadId: string,
+  parts: { PartNumber: number; ETag: string }[]
+) => {
+  return createClient().send(
+    new CompleteMultipartUploadCommand({
+      ...commandConfig,
+      Key: key,
+      UploadId: uploadId,
+      MultipartUpload: {
+        Parts: parts,
+      },
+    })
+  );
+};
+
+export const abortMultipartUpload = (key: string, uploadId: string) => {
+  return createClient().send(
+    new AbortMultipartUploadCommand({
+      ...commandConfig,
+      Key: key,
+      UploadId: uploadId,
+    })
+  );
 };

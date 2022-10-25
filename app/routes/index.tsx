@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useFetcher } from "@remix-run/react";
 import Uppy from "@uppy/core";
 import DragDrop from "@uppy/drag-drop";
-import AwsS3 from "@uppy/aws-s3";
+import AwsS3Multipart from "@uppy/aws-s3-multipart";
 import StatusBar from "@uppy/status-bar";
 import { getRestrictions } from "~/utils/restrictions";
 
@@ -11,7 +11,7 @@ import type { LinksFunction } from "@remix-run/node";
 import uppyCoreStyles from "@uppy/core/dist/style.css";
 import uppyDragDropStyles from "@uppy/drag-drop/dist/style.css";
 import uppyStatusBarStyles from "@uppy/status-bar/dist/style.css";
-import { FileRenamePlugin } from "~/utils/file";
+import { FileRenamePlugin, CheckResumePlugin } from "~/utils/file";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: uppyCoreStyles },
@@ -40,9 +40,10 @@ export default function Index() {
           target: "#progress",
           hideAfterFinish: false,
         })
-        .use(AwsS3, {
+        .use(AwsS3Multipart, {
           companionUrl: "/api/companion",
         })
+        .use(CheckResumePlugin)
         .on("upload-success", (file, response) => {
           const url = response.uploadURL;
           const filename = (file?.data as File).name;
